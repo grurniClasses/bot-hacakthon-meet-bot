@@ -38,6 +38,7 @@ def start(update: Update, context: CallbackContext):
         data = meetings.find_one({'code': code})
         meetings_message = f'Please select the dates you can from the flows dates : {data["dates"]}'
         context.bot.send_message(chat_id=chat_id, text=meetings_message)
+        context.user_data['code']=code
     else:
         context.bot.send_message(chat_id=chat_id, text=WELCOME_MESSAGE)
 
