@@ -1,9 +1,9 @@
-# 🚧 YOUR BOT NAME HERE
+# 🚧 MEET BOT
 
 ## The Team
-- 🚧 Participant 1 Name
-- 🚧 Participant 2 Name
-- 🚧 Participant 3 Name
+- 🚧 Marina Lobanov
+- 🚧 Neta Kleman
+- 🚧 Hagar Laks
 
 ## About this bot
 
