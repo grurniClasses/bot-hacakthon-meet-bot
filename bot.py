@@ -1,7 +1,6 @@
 import logging
 import random
 import string
-from pprint import pprint
 
 from telegram import Update
 from telegram.ext import (
@@ -46,23 +45,38 @@ def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 def respond(update: Update, context: CallbackContext):
+    if context.user_data.get('code') is None:
+        chat_id = update.effective_chat.id
+        code = get_random_code()
+        logger.info(f"= Got on chat #{chat_id},{code=}")
+        datesDic = {}
+        for date in update.message.text.split(','):
+            datesDic[date] = 1
+        meeting = {
+            'dates': datesDic,
+            'createre_chat_id': chat_id,
+            'code':code
+        }
+        result = meetings.insert_one(meeting)
+        url_req = f"https://t.me/{bot_name}?start={code}"
+        context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
+        meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
+        context.bot.send_message(chat_id=chat_id, text=meeting_message)
+    else:
+        dates = meetings.find_one({'code': context.user_data['code']})["dates"]
+        for date in update.message.text.split(','):
+            dates[date] += 1
+        meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
+
+def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
-    code = get_random_code()
-    logger.info(f"= Got on chat #{chat_id},{code=}")
-    meeting = {
-        'dates': update.message.text.split(','),
-        'createre_chat_id': chat_id,
-        'code':code
-    }
-    result = meetings.insert_one(meeting)
-    url_req = f"https://t.me/{bot_name}?start={code}"
-    context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
-    meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
-    context.bot.send_message(chat_id=chat_id, text=meeting_message)
+    dates = meetings.find_one({'code': context.user_data['code']})["dates"]
+    context.bot.send_message(chat_id=chat_id, text=dates)
 
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
 my_bot.dispatcher.add_handler(CommandHandler("start", start))
+my_bot.dispatcher.add_handler(CommandHandler("status", status))
 my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
 
 logger.info("* Start polling...")
