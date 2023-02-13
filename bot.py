@@ -45,6 +45,12 @@ def start(update: Update, context: CallbackContext):
     else:
         calendar_handler(update,context)
 
+def get_random_code(k=16):
+    return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
+
+def calendar_handler(update: Update, context: CallbackContext):
+    update.message.reply_text("Please select a date: ",
+                        reply_markup=telegramcalendar.create_calendar())
 def callback_handler(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     query = update.callback_query
@@ -60,50 +66,15 @@ def callback_handler(update: Update, context: CallbackContext):
             dates[date] += 1
         meetings.update_one({'code': context.user_data['code']}, {"$set": {'dates': dates}})
     #todo Keep buttons on and update chosen dates
-
-
-def get_random_code(k=16):
-    return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
-
-
-def calendar_handler(update: Update, context: CallbackContext):
-    update.message.reply_text("Please select a date: ",
-                        reply_markup=telegramcalendar.create_calendar())
-
-
-
-def inline_handler(update: Update, context: CallbackContext):
-    selected,date = telegramcalendar.process_calendar_selection(update, context)
-    if selected:
+    cmd = data.split(";")
+    if cmd[0] == "DAY":
+        date = f'{cmd[3]}/{cmd[2]}/{cmd[1]}'
+        d = context.user_data.get("dates", {})
+        d[date] = d.get(date, 0) + 1
+        context.user_data["dates"] = d
+        query.edit_message_text(text=f"{data}", reply_markup=telegramcalendar.create_calendar())
         context.bot.send_message(chat_id=update.callback_query.from_user.id,
-                        text="You selected %s" % (date.strftime("%d/%m/%Y")),
-                        reply_markup=ReplyKeyboardRemove())
-
-
-def respond(update: Update, context: CallbackContext):
-    if context.user_data.get('code') is None:
-        chat_id = update.effective_chat.id
-        code = get_random_code()
-        logger.info(f"= Got on chat #{chat_id},{code=}")
-        datesDic = {}
-        for date in update.message.text.split(','):
-            datesDic[date] = 1
-        meeting = {
-            'dates': datesDic,
-            'createre_chat_id': chat_id,
-            'code':code
-        }
-        result = meetings.insert_one(meeting)
-        url_req = f"https://t.me/{bot_name}?start={code}"
-        context.bot.send_message(chat_id=chat_id, text='Please forward the following message to your guests')
-        meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
-        context.bot.send_message(chat_id=chat_id, text=meeting_message)
-    else:
-        dates = meetings.find_one({'code': context.user_data['code']})["dates"]
-        for date in update.message.text.split(','):
-            dates[date] += 1
-        meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
-
+                                 text="You selected %s" % (date))
 
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
@@ -113,24 +84,6 @@ def status(update: Update, context: CallbackContext):
     for k, v in dates.items():
         thumbs = (v-1)*"👍"
         context.bot.send_message(chat_id=chat_id, text=f"{k}: {thumbs}")
-
-
-
-def callback_handler(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    query = update.callback_query
-    data = query.data
-    logger.info(f"> CALLBACK #{chat_id}, {data=}")
-    query.answer()
-    cmd = data.split(";")
-    if cmd[0] == "DAY":
-        date = f'{cmd[3]}/{cmd[2]}/{cmd[1]}'
-        d = context.user_data.get("dates", {})
-        d[date] = d.get(date, 0) + 1
-        context.user_data["dates"] =d
-        query.edit_message_text(text=f"{data}", reply_markup=telegramcalendar.create_calendar())
-        context.bot.send_message(chat_id=update.callback_query.from_user.id,
-                                 text="You selected %s" % (date))
 
 def end(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
