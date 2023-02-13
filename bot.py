@@ -25,6 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 WELCOME_MESSAGE = "Hey there! \bwhen do you want to organize your meeting?"
+meetings_message = f'Please select the dates you can from the following dates : '
 
 def start(update: Update, context: CallbackContext):
     context.user_data["dates"] = {}
@@ -33,7 +34,6 @@ def start(update: Update, context: CallbackContext):
     if len(update.message.text.split()) > 1:
         code = update.message.text.split()[1]
         data = meetings.find_one({'code': code})
-        meetings_message = f'Please select the dates you can from the following dates : '
         context.user_data['code'] = code
         options_list = list(data["dates"].keys())
         button_options_list = [
@@ -66,15 +66,18 @@ def callback_handler(update: Update, context: CallbackContext):
             dates[date] += 1
         meetings.update_one({'code': context.user_data['code']}, {"$set": {'dates': dates}})
     #todo Keep buttons on and update chosen dates
+    print(data)
     cmd = data.split(";")
-    if cmd[0] == "DAY":
-        date = f'{cmd[3]}/{cmd[2]}/{cmd[1]}'
-        d = context.user_data.get("dates", {})
-        d[date] = d.get(date, 0) + 1
-        context.user_data["dates"] = d
-        query.edit_message_text(text=f"{data}", reply_markup=telegramcalendar.create_calendar())
-        context.bot.send_message(chat_id=update.callback_query.from_user.id,
-                                 text="You selected %s" % (date))
+    if cmd[0] == "DAY" or cmd[0]=='NEXT-MONTH':
+        selected, date = telegramcalendar.process_calendar_selection(update, context)
+        if selected:
+            print(date)
+            date = date.strftime("%d/%m/%Y")
+            d = context.user_data.get("dates", {})
+            d[date] = d.get(date, 0) + 1
+            context.user_data["dates"] = d
+            context.bot.send_message(chat_id=update.callback_query.from_user.id,text="You selected %s" % (date))
+            query.edit_message_text(text=meetings_message, reply_markup=telegramcalendar.create_calendar())
 
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
