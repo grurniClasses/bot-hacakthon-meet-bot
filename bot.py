@@ -2,6 +2,11 @@ import logging
 import random
 import string
 from pprint import pprint
+import bot_settings
+
+from telegram import  ReplyKeyboardRemove
+
+
 
 from telegram import Update
 from telegram.ext import (
@@ -9,13 +14,13 @@ from telegram.ext import (
     CallbackContext,
     MessageHandler,
     Filters,
-    Updater
+    Updater, CallbackQueryHandler
 )
 from pymongo import MongoClient
 
-import bot_settings
+import telegramcalendar
 
-bot_name = 'GiliTheKingBot'
+bot_name = 'HebrewguessnumberBOT'
 client = MongoClient()
 db = client.get_database("meetingDB")
 meetings = db.get_collection("meetings")
@@ -45,6 +50,19 @@ def start(update: Update, context: CallbackContext):
 def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
+
+def calendar_handler(bot,update):
+    update.message.reply_text("Please select a date: ",
+                        reply_markup=telegramcalendar.create_calendar())
+
+def inline_handler(bot,update):
+    selected,date = telegramcalendar.process_calendar_selection(bot, update)
+    if selected:
+        bot.send_message(chat_id=update.callback_query.from_user.id,
+                        text="You selected %s" % (date.strftime("%d/%m/%Y")),
+                        reply_markup=ReplyKeyboardRemove())
+
+
 def respond(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     code = get_random_code()
@@ -63,7 +81,11 @@ def respond(update: Update, context: CallbackContext):
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
 my_bot.dispatcher.add_handler(CommandHandler("start", start))
+my_bot.dispatcher.add_handler(CommandHandler("calendar", calendar_handler))
+my_bot.dispatcher.add_handler(CallbackQueryHandler(inline_handler))
 my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
+
+
 
 logger.info("* Start polling...")
 my_bot.start_polling()  # Starts polling in a background thread.
