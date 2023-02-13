@@ -4,9 +4,7 @@ import string
 from pprint import pprint
 import bot_settings
 
-from telegram import  ReplyKeyboardRemove
-
-
+from telegram import ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 
 from telegram import Update
 from telegram.ext import (
@@ -41,11 +39,19 @@ def start(update: Update, context: CallbackContext):
     if len(update.message.text.split()) > 1:
         code = update.message.text.split()[1]
         data = meetings.find_one({'code': code})
-        meetings_message = f'Please select the dates you can from the flows dates : {data["dates"]}'
-        context.bot.send_message(chat_id=chat_id, text=meetings_message)
-        context.user_data['code']=code
+        meetings_message = f'Please select the dates you can from the following dates : '
+        context.user_data['code'] = code
+        options_list = list(data["dates"].keys())
+        button_options_list = [
+            [InlineKeyboardButton(f"{option}", callback_data=f"{option}")]  for option in options_list
+        ]
+        buttons = button_options_list
+        reply_markup = InlineKeyboardMarkup(buttons)
+        context.bot.send_message(chat_id=chat_id, text=meetings_message, reply_markup = reply_markup)
+
     else:
         context.bot.send_message(chat_id=chat_id, text=WELCOME_MESSAGE)
+
 
 def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -54,6 +60,7 @@ def get_random_code(k=16):
 def calendar_handler(update: Update, context: CallbackContext):
     update.message.reply_text("Please select a date: ",
                         reply_markup=telegramcalendar.create_calendar())
+
 
 def inline_handler(update: Update, context: CallbackContext):
     selected,date = telegramcalendar.process_calendar_selection(update, context)
@@ -86,6 +93,7 @@ def respond(update: Update, context: CallbackContext):
         for date in update.message.text.split(','):
             dates[date] += 1
         meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
+
 
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
