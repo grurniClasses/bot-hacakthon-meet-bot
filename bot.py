@@ -39,7 +39,11 @@ def start(update: Update, context: CallbackContext):
     logger.info(f"> Start chat #{chat_id}")
     if len(update.message.text.split()) > 1:
         context.user_data['code'] = update.message.text.split()[1]
-        guess_schedule_handler(update, context)
+        guesses = meetings.find_one({'code': context.user_data['code']})['guesses']
+        if chat_id in guesses:
+            context.bot.send_message(chat_id=chat_id, text='Sorry, but you already register for the meeting')
+        else:
+            guess_schedule_handler(update, context)
     else:
         calendar_handler(update, context)
 
@@ -136,8 +140,8 @@ def inviter_submit(update: Update, context: CallbackContext, name=None):
     logger.info(f"= Got on chat #{chat_id},{code=}")
     meeting = {
         'dates': context.user_data["dates"],
-        'createre_chat_id': chat_id,
-        'code': code
+        'code': code,
+        'guesses': []
     }
     meetings.insert_one(meeting)
     url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
@@ -153,6 +157,7 @@ def guess_submit(update: Update, context: CallbackContext):
     for date in context.user_data["dates"]:
         dates[date] += 1
     meetings.update_one({'code': context.user_data['code']}, {"$set": {'dates': dates}})
+    meetings.update_one({'code': context.user_data['code']}, {'$push': {'guesses': update.effective_chat.id}})
 
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
