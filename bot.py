@@ -6,6 +6,7 @@ import bot_settings
 
 from telegram import ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 
+
 from telegram import Update
 from telegram.ext import (
     CommandHandler,
@@ -78,6 +79,7 @@ def calendar_handler(update: Update, context: CallbackContext):
                         reply_markup=telegramcalendar.create_calendar())
 
 
+
 def inline_handler(update: Update, context: CallbackContext):
     selected,date = telegramcalendar.process_calendar_selection(update, context)
     if selected:
@@ -128,6 +130,7 @@ my_bot.dispatcher.add_handler(CommandHandler("start", start))
 my_bot.dispatcher.add_handler(CommandHandler("status", status))
 my_bot.dispatcher.add_handler(CommandHandler("calendar", calendar_handler))
 my_bot.dispatcher.add_handler(CallbackQueryHandler(callback_handler))
+
 
 
 my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
