@@ -2,6 +2,7 @@ import logging
 import random
 import string
 from pprint import pprint
+
 import bot_settings
 
 from telegram import  ReplyKeyboardRemove
@@ -20,7 +21,6 @@ from pymongo import MongoClient
 
 import telegramcalendar
 
-bot_name = 'HebrewguessnumberBOT'
 client = MongoClient()
 db = client.get_database("meetingDB")
 meetings = db.get_collection("meetings")
@@ -32,7 +32,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-WELCOME_MESSAGE = "Hey there! when do you want to organize your meeting?"
+WELCOME_MESSAGE = "Hey there! \bwhen do you want to organize your meeting?"
 
 
 def start(update: Update, context: CallbackContext):
@@ -45,60 +45,89 @@ def start(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=meetings_message)
         context.user_data['code']=code
     else:
-        context.bot.send_message(chat_id=chat_id, text=WELCOME_MESSAGE)
+        calendar_handler(update,context)
 
 def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 
 def calendar_handler(update: Update, context: CallbackContext):
-    update.message.reply_text("Please select a date: ",
-                        reply_markup=telegramcalendar.create_calendar())
+    update.message.reply_text(text=WELCOME_MESSAGE,reply_markup=telegramcalendar.create_calendar())
 
-def inline_handler(update: Update, context: CallbackContext):
-    selected,date = telegramcalendar.process_calendar_selection(update, context)
-    if selected:
-        context.bot.send_message(chat_id=update.callback_query.from_user.id,
-                        text="You selected %s" % (date.strftime("%d/%m/%Y")),
-                        reply_markup=ReplyKeyboardRemove())
+# def inline_handler(update: Update, context: CallbackContext):
+#     selected,date = telegramcalendar.process_calendar_selection(update, context)
+#     if selected:
+#         context.bot.send_message(chat_id=update.callback_query.from_user.id,
+#                         text="You selected %s" % (date.strftime("%d/%m/%Y")),
+#                         reply_markup=ReplyKeyboardRemove())
+#         chat_id = update.effective_chat.id
+#         code = get_random_code()
+#         logger.info(f"= Got on chat #{chat_id},{code=}")
+#         datesDic={}
+#         datesDic[date.strftime("%d/%m/%Y")] = 1
+#         meeting = {
+#             'dates': datesDic,
+#             'createre_chat_id': chat_id,
+#             'code': code
+#         }
+#         pprint(meeting)
+#         result = meetings.insert_one(meeting)
+#         url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
+#         context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
+#         meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
+#         context.bot.send_message(chat_id=chat_id, text=meeting_message)
 
-
-def respond(update: Update, context: CallbackContext):
-    if context.user_data.get('code') is None:
-        chat_id = update.effective_chat.id
-        code = get_random_code()
-        logger.info(f"= Got on chat #{chat_id},{code=}")
-        datesDic = {}
-        for date in update.message.text.split(','):
-            datesDic[date] = 1
-        meeting = {
-            'dates': datesDic,
-            'createre_chat_id': chat_id,
-            'code':code
-        }
-        result = meetings.insert_one(meeting)
-        url_req = f"https://t.me/{bot_name}?start={code}"
-        context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
-        meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
-        context.bot.send_message(chat_id=chat_id, text=meeting_message)
-    else:
-        dates = meetings.find_one({'code': context.user_data['code']})["dates"]
-        for date in update.message.text.split(','):
-            dates[date] += 1
-        meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
+# def respond(update: Update, context: CallbackContext,date=None):
+#     if context.user_data.get('code') is None:
+#         chat_id = update.effective_chat.id
+#         code = get_random_code()
+#         logger.info(f"= Got on chat #{chat_id},{code=}")
+#         datesDic = {}
+#         for date in update.message.text.split(','):
+#             datesDic[date] = 1
+#         meeting = {
+#             'dates': datesDic,
+#             'createre_chat_id': chat_id,
+#             'code':code
+#         }
+#         result = meetings.insert_one(meeting)
+#         url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
+#         context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
+#         meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
+#         context.bot.send_message(chat_id=chat_id, text=meeting_message)
+#     else:
+#         dates = meetings.find_one({'code': context.user_data['code']})["dates"]
+#         for date in update.message.text.split(','):
+#             dates[date] += 1
+#         meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
 
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     dates = meetings.find_one({'code': context.user_data['code']})["dates"]
     context.bot.send_message(chat_id=chat_id, text=dates)
 
+def callback_handler(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    query = update.callback_query
+    data = query.data
+    logger.info(f"> CALLBACK #{chat_id}, {data=}")
+    query.answer()
+    cmd = data.split(":")[0]
+    if cmd == "start" and len(cmd) == 0:
+        # n = int(data.split(":")[1])
+        # d = context.user_data.get("counters", {})
+        # d[n] = d.get(n, 0) + 1
+        # context.user_data["counters"] = d
+        # reply_markup = get_counters_keyboard(d)
+        query.edit_message_text(text=f"{data}", reply_markup=telegramcalendar.create_calendar())
+
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
 my_bot.dispatcher.add_handler(CommandHandler("start", start))
 my_bot.dispatcher.add_handler(CommandHandler("status", status))
-my_bot.dispatcher.add_handler(CommandHandler("calendar", calendar_handler))
-my_bot.dispatcher.add_handler(CallbackQueryHandler(inline_handler))
-my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
+# my_bot.dispatcher.add_handler(CommandHandler("calendar", calendar_handler))
+# my_bot.dispatcher.add_handler(CallbackQueryHandler(inline_handler))
+# my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
 
 
 
