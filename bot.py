@@ -103,37 +103,6 @@ def end(update: Update, context: CallbackContext):
     meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
     context.bot.send_message(chat_id=chat_id, text=meeting_message)
 
-def callback_handler(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    query = update.callback_query
-    data = query.data
-    logger.info(f"> CALLBACK #{chat_id}, {data=}")
-    query.answer()
-    cmd = data.split(";")
-    if cmd[0] == "DAY":
-        date = f'{cmd[3]}/{cmd[2]}/{cmd[1]}'
-        d = context.user_data.get("dates", {})
-        d[date] = d.get(date, 0) + 1
-        context.user_data["dates"] =d
-        query.edit_message_text(text=f"{data}", reply_markup=telegramcalendar.create_calendar())
-        context.bot.send_message(chat_id=update.callback_query.from_user.id,
-                                 text="You selected %s" % (date))
-
-def end(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    code = get_random_code()
-    logger.info(f"= Got on chat #{chat_id},{code=}")
-    meeting = {
-        'dates': context.user_data["dates"],
-        'createre_chat_id': chat_id,
-        'code':code
-    }
-    result = meetings.insert_one(meeting)
-    url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
-    context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
-    meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
-    context.bot.send_message(chat_id=chat_id, text=meeting_message)
-
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
 my_bot.dispatcher.add_handler(CommandHandler("start", start))
