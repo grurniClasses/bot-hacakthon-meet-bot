@@ -24,7 +24,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-WELCOME_MESSAGE = "Hey there! \bwhen do you want to organize your meeting?"
+WELCOME_MESSAGE = "Hey there! \bChoose date options to organize your meeting \b let me know you are done by sending /end"
 meetings_message = f'Please select the dates you can from the following dates : '
 
 def start(update: Update, context: CallbackContext):
@@ -49,7 +49,7 @@ def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 def calendar_handler(update: Update, context: CallbackContext):
-    update.message.reply_text("Please select a date: ",
+    update.message.reply_text(WELCOME_MESSAGE,
                         reply_markup=telegramcalendar.create_calendar())
 def callback_handler(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
@@ -82,7 +82,7 @@ def callback_handler(update: Update, context: CallbackContext):
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     dates = meetings.find_one({'code': context.user_data['code']})["dates"]
-    context.bot.send_message(chat_id=chat_id, text="Current event status:")
+    context.bot.send_message(chat_id=chat_id, text="Your guests chose:")
 
     for k, v in dates.items():
         thumbs = (v-1)*"👍"
@@ -99,9 +99,12 @@ def end(update: Update, context: CallbackContext):
     }
     result = meetings.insert_one(meeting)
     url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
-    context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
-    meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
+    context.bot.send_message(chat_id=chat_id, text='Please forward the following message to your guests')
+    meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req} and press *START*'
     context.bot.send_message(chat_id=chat_id, text=meeting_message)
+
+    context.bot.send_message(chat_id=chat_id, text='Give them a little while to answer. send /status to see what they chose')
+
 
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
