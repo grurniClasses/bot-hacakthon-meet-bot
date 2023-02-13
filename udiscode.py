@@ -57,6 +57,7 @@ def callback_handler(update: Update, context: CallbackContext):
     data = query.data
     logger.info(f"> CALLBACK #{chat_id}, {data=}")
     query.answer()
+    print(data)
     cmd = data.split(":")[0]
     if cmd == "counters":
         n = int(data.split(":")[1])
