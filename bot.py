@@ -94,10 +94,10 @@ def callback_handler(update: Update, context: CallbackContext):
         update_inviter_dates(update, context)
     if cmd[0] == 'inviter_submit':
         inviter_submit(update, context, query.message.chat.first_name)
-        context.bot.dele(chat_id=chat_id,message_id=)
+        # context.bot.dele(chat_id=chat_id,message_id=)
     if cmd[0] == 'guess_submit':
         guess_submit(update, context)
-        context.bot.deleteMessage(chat_id=chat_id,message_id=)
+        # context.bot.deleteMessage(chat_id=chat_id,message_id=)
 
 
 def update_guess_dates(update: Update, context: CallbackContext):
