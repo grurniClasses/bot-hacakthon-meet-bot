@@ -4,8 +4,7 @@ import string
 from pprint import pprint
 import bot_settings
 
-from telegram import  ReplyKeyboardRemove
-
+from telegram import ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 
 
 from telegram import Update
@@ -41,11 +40,35 @@ def start(update: Update, context: CallbackContext):
     if len(update.message.text.split()) > 1:
         code = update.message.text.split()[1]
         data = meetings.find_one({'code': code})
-        meetings_message = f'Please select the dates you can from the flows dates : {data["dates"]}'
-        context.bot.send_message(chat_id=chat_id, text=meetings_message)
-        context.user_data['code']=code
+        meetings_message = f'Please select the dates you can from the following dates : '
+        context.user_data['code'] = code
+        options_list = list(data["dates"].keys())
+        button_options_list = [
+            [InlineKeyboardButton(f"{option}", callback_data=f"option:{option}")]  for option in options_list
+        ]
+        buttons = button_options_list
+        reply_markup = InlineKeyboardMarkup(buttons)
+        context.bot.send_message(chat_id=chat_id, text=meetings_message, reply_markup = reply_markup)
+
     else:
         context.bot.send_message(chat_id=chat_id, text=WELCOME_MESSAGE)
+
+def callback_handler(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    query = update.callback_query
+    data = query.data
+    logger.info(f"> CALLBACK #{chat_id}, {data=}")
+    query.answer()
+    cmd = data.split(":")[0]
+    if cmd == "option":
+        chosen_dates = [data.split(":")[1]]
+        query.edit_message_text(text=f"your chosen dates are: {chosen_dates}")
+        dates = meetings.find_one({'code': context.user_data['code']})["dates"]
+        for date in chosen_dates:
+            dates[date] += 1
+        meetings.update_one({'code': context.user_data['code']}, {"$set": {'dates': dates}})
+    #todo Keep buttons on and update chosen dates
+
 
 def get_random_code(k=16):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -54,6 +77,8 @@ def get_random_code(k=16):
 def calendar_handler(update: Update, context: CallbackContext):
     update.message.reply_text("Please select a date: ",
                         reply_markup=telegramcalendar.create_calendar())
+
+
 
 def inline_handler(update: Update, context: CallbackContext):
     selected,date = telegramcalendar.process_calendar_selection(update, context)
@@ -78,7 +103,7 @@ def respond(update: Update, context: CallbackContext):
         }
         result = meetings.insert_one(meeting)
         url_req = f"https://t.me/{bot_name}?start={code}"
-        context.bot.send_message(chat_id=chat_id, text='Please forward the follow message to your guests')
+        context.bot.send_message(chat_id=chat_id, text='Please forward the following message to your guests')
         meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req}'
         context.bot.send_message(chat_id=chat_id, text=meeting_message)
     else:
@@ -87,17 +112,27 @@ def respond(update: Update, context: CallbackContext):
             dates[date] += 1
         meetings.update_one({'code':context.user_data['code']},{"$set":{'dates':dates}})
 
+
 def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     dates = meetings.find_one({'code': context.user_data['code']})["dates"]
-    context.bot.send_message(chat_id=chat_id, text=dates)
+    context.bot.send_message(chat_id=chat_id, text="Current event status:")
+
+    for k, v in dates.items():
+        thumbs = (v-1)*"👍"
+        context.bot.send_message(chat_id=chat_id, text=f"{k}: {thumbs}")
+
+
 
 
 my_bot = Updater(token=bot_settings.BOT_TOKEN, use_context=True)
 my_bot.dispatcher.add_handler(CommandHandler("start", start))
 my_bot.dispatcher.add_handler(CommandHandler("status", status))
 my_bot.dispatcher.add_handler(CommandHandler("calendar", calendar_handler))
-my_bot.dispatcher.add_handler(CallbackQueryHandler(inline_handler))
+my_bot.dispatcher.add_handler(CallbackQueryHandler(callback_handler))
+
+
+
 my_bot.dispatcher.add_handler(MessageHandler(Filters.text, respond))
 
 
