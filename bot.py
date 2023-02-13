@@ -101,7 +101,7 @@ def end(update: Update, context: CallbackContext):
     url_req = f"https://t.me/{bot_settings.BOT_NAME}?start={code}"
     context.bot.send_message(chat_id=chat_id, text='Please forward the following message to your guests')
     meeting_message = f'You are invited by {update.message.chat.first_name} to a meeting. \b Follow the link to see the invitation {url_req} and press *START*'
-    context.bot.send_message(chat_id=chat_id, text=meeting_message)
+    context.bot.send_message(chat_id=chat_id, text=meeting_message)git
 
     context.bot.send_message(chat_id=chat_id, text='Give them a little while to answer. send /status to see what they chose')
 
