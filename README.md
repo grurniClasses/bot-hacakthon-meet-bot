@@ -1,25 +1,44 @@
 # 🚧 MEET BOT
 
 ## The Team
-- 🚧 Marina Lobanov
-- 🚧 Neta Kleman
-- 🚧 Hagar Laks
+- Marina Lobanov
+- Neta Kleman
+- Hagar Laks
 
 ## About this bot
 
-🚧 ENTER DESCRIPTION HERE
+With this bot you can easly schedule event with multiple guesses.
 
-🚧 YOU CAN ADD A t.me LINK TO THE BOT HERE
+https://t.me/BotMeetBot
 
-🚧 ADD SCREENSHOTS/GIFS/SCREENCAST HERE (REFER TO MARKDOWN'S SYNTAX FOR HELP ON DISPLAYING IMAGES)
+Start a new meeting-
+![image](https://user-images.githubusercontent.com/59369034/218679042-340575c2-006d-4fb0-9fa3-23377b684009.png)
 
-🚧 ADD ANY OTHER NOTES REGARDING THE BOT
+inviter selected dates-
+![image](https://user-images.githubusercontent.com/59369034/218679538-8650ceb1-d956-410b-a5bb-281021b39516.png)
+
+Inviter submitted-
+![image](https://user-images.githubusercontent.com/59369034/218679791-1aa3fb55-1980-4c21-b36e-98e59caf6d24.png)
+
+Guess enter the link and press start-
+![image](https://user-images.githubusercontent.com/59369034/218679921-22093eeb-919f-4529-a8fd-b8c393b7a037.png)
+
+Guess selected the dates he can-
+![image](https://user-images.githubusercontent.com/59369034/218680028-0f9a94d4-e2ad-4eac-8936-489b5b45ed50.png)
+
+Guess submited-
+![image](https://user-images.githubusercontent.com/59369034/218680982-db95c8b9-f059-4416-96c0-e8a6a29f0fd1.png)
+
+Guess\Inviter send /status-
+![image](https://user-images.githubusercontent.com/59369034/218680147-f02a2fdc-a3c1-4791-8081-9df50421e22a.png)
  
 ## Instructions for Developers 
 ### Prerequisites
 - Python 3.10
 - Poetry
-- 🚧 ADD ANY OTHER PREREQUISITE HERE (MONGODB?)
+- python-telegram-bot 13.15
+- requests 2.28.2
+- pymongo 4.3.3
 
 ### Setup
 - git clone this repository 
@@ -33,7 +52,7 @@
 - Create a `bot_settings.py` file with your bot token:
 
       BOT_TOKEN = 'xxxxxxx'
-
+      BOT_NAME = 'xxxxxxx'
 ### Running the bot        
 - Run the bot:
 
