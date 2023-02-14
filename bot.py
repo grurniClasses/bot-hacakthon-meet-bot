@@ -22,7 +22,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-WELCOME_INVITER_MESSAGE = "Hey there! \nChoose date options to organize your meeting \nLet me know you are done by sending /end or pressing the submit button"
+WELCOME_INVITER_MESSAGE = "Hey there! \nChoose date options to organize your meeting \nLet me know you are done by pressing thsubmit button"
 SUBMIT_BUTTON = 'Let me know when you are done by pressing the submit button'
 GUEST_MESSAGE = 'Please select the dates you can from the following dates : '
 
