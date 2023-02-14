@@ -22,7 +22,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-WELCOME_INVITER_MESSAGE = "Hey there! \nChoose date options to organize your meeting \nLet me know you are done by pressing thsubmit button"
+WELCOME_INVITER_MESSAGE = "Hey there! \nChoose date options to organize your meeting"
 SUBMIT_BUTTON = 'Let me know when you are done by pressing the submit button'
 GUEST_MESSAGE = 'Please select the dates you can from the following dates : '
 
@@ -132,10 +132,11 @@ def status(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     dates = meetings.find_one({'code': context.user_data['code']})["dates"]
     guesses = meetings.find_one({'code': context.user_data['code']})["guesses"]
-    context.bot.send_message(chat_id=chat_id, text=f"Your guests chose: ({len(guesses)} answered)")
+    context.bot.send_message(chat_id=chat_id, text=f"The answers fot this meeting are: ")
     for k, v in dates.items():
         thumbs = v * "👍"
-        context.bot.send_message(chat_id=chat_id, text=f"{k}: {thumbs}")
+        context.bot.send_message(chat_id=chat_id, text=f"📅{k}: {thumbs}")
+    context.bot.send_message(chat_id=chat_id, text=f"👥 {len(guesses)} answers")
 
 
 def inviter_submit(update: Update, context: CallbackContext, name=None):
