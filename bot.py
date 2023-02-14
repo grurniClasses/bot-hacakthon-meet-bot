@@ -160,7 +160,6 @@ def inviter_submit(update: Update, context: CallbackContext, name=None):
     context.bot.send_message(chat_id=chat_id,
                              text='Give them a little while to answer. Send /status to see what they chose')
 
-
 def guess_submit(update: Update, context: CallbackContext):
     dates = meetings.find_one({'code': context.user_data['code']})["dates"]
     for date in context.user_data["dates"]:
