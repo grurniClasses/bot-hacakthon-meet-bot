@@ -12,25 +12,31 @@ With this bot you can easly schedule event with multiple guesses.
 https://t.me/BotMeetBot
 
 Start a new meeting-
-![image](https://user-images.githubusercontent.com/59369034/218679042-340575c2-006d-4fb0-9fa3-23377b684009.png)
+![image](https://user-images.githubusercontent.com/59369034/218679042-340575c2-006d-4fb0-9fa3-23377b684009.png | width=100)
 
 inviter selected dates-
-![image](https://user-images.githubusercontent.com/59369034/218679538-8650ceb1-d956-410b-a5bb-281021b39516.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218679538-8650ceb1-d956-410b-a5bb-281021b39516.png | width=100)
 
 Inviter submitted-
-![image](https://user-images.githubusercontent.com/59369034/218679791-1aa3fb55-1980-4c21-b36e-98e59caf6d24.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218679791-1aa3fb55-1980-4c21-b36e-98e59caf6d24.png | width=100)
 
 Guess enter the link and press start-
-![image](https://user-images.githubusercontent.com/59369034/218679921-22093eeb-919f-4529-a8fd-b8c393b7a037.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218679921-22093eeb-919f-4529-a8fd-b8c393b7a037.png | width=100)
 
 Guess selected the dates he can-
-![image](https://user-images.githubusercontent.com/59369034/218680028-0f9a94d4-e2ad-4eac-8936-489b5b45ed50.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218680028-0f9a94d4-e2ad-4eac-8936-489b5b45ed50.png | width=100)
 
 Guess submited-
-![image](https://user-images.githubusercontent.com/59369034/218680982-db95c8b9-f059-4416-96c0-e8a6a29f0fd1.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218680982-db95c8b9-f059-4416-96c0-e8a6a29f0fd1.png | width=100)
 
 Guess\Inviter send /status-
-![image](https://user-images.githubusercontent.com/59369034/218680147-f02a2fdc-a3c1-4791-8081-9df50421e22a.png)
+\
+![image](https://user-images.githubusercontent.com/59369034/218680147-f02a2fdc-a3c1-4791-8081-9df50421e22a.png | width=100)
  
 ## Instructions for Developers 
 ### Prerequisites
