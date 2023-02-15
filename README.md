@@ -1,4 +1,4 @@
-# 🚧 MEET BOT
+# MEET BOT
 
 ## The Team
 
@@ -60,7 +60,7 @@ Guess\Inviter send /status-
 
 
 - Get an API Token for a bot via the [BotFather](https://telegram.me/BotFather)
-- Create a `bot_settings.py` file with your bot token:
+- Create a `bot_settings.py` file with your bot token and bot name:
 
       BOT_TOKEN = 'xxxxxxx'
       BOT_NAME = 'xxxxxxx'
