@@ -7,7 +7,7 @@
 - Hagar Laks
 
 ## About this bot
-
+### The bot that helps you get together
 With this bot you can easily schedule event with multiple guesses.
 
 https://t.me/BotMeetBot
